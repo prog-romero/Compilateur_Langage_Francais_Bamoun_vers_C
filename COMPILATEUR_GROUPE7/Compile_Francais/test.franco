@@ -1,0 +1,25 @@
+
+programme {
+    entier a;
+    entier b;
+    entier reste;
+
+    afficher "--- Calcul du PGCD de deux nombres ---";
+    
+    afficher "Entrez le premier nombre (a) :";
+    a = lire();
+
+    afficher "Entrez le deuxième nombre (b) :";
+    b = lire();
+
+    // Boucle principale de l'algorithme d'Euclide
+    tantque (b != 0) {
+        reste = a % b;
+        a = b;
+        b = reste;
+    }
+
+    afficher "Le PGCD est :";
+    afficher a;
+}
+

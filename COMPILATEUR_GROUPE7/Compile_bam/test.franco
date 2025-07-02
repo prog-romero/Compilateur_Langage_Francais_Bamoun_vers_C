@@ -1,0 +1,46 @@
+zə̀n nə̀ dzə́ə̀ {
+    tə̀n n;        
+    tə̀n i;        
+    
+    pə̀n vecteurA[4];
+    pə̀n vecteurB[4];
+    
+    pə̀n produit_scalaire; 
+
+    
+    n = 4;
+
+    
+    vecteurA[0] = 1;
+    vecteurA[1] = 3;
+    vecteurA[2] = -2;
+    vecteurA[3] = 4;
+    
+    
+    vecteurB[0] = 2;
+    vecteurB[1] = 1;
+    vecteurB[2] = 5;
+    vecteurB[3] = -1;
+
+    
+
+    
+    
+
+    
+    
+    
+    produit_scalaire = 0;
+    
+    
+    pə̀ (i = 0; i < n; i = i + 1) {
+        
+        produit_scalaire = produit_scalaire + (vecteurA[i] * vecteurB[i]);
+    }
+    
+    
+    
+    nzuə̀ "Le resultat du produit scalaire est :";
+    nzuə̀ produit_scalaire;
+    
+}

@@ -1,0 +1,806 @@
+programme {
+    entier nombre;
+    chaine resultat;
+    
+    afficher "Entrez un nombre entier :";
+    nombre = lire();
+
+    resultat = (nombre > 0) ? "Positif" : ((nombre < 0) ? "Négatif" : "Nul");
+
+    afficher "Le nombre est :";
+    afficher resultat;
+}
+
+
+
+
+
+
+
+
+
+programme {
+    entier a;
+    entier b;
+    entier reste;
+
+    afficher "--- Calcul du PGCD de deux nombres ---";
+    
+    afficher "Entrez le premier nombre (a) :";
+    a = lire();
+
+    afficher "Entrez le deuxième nombre (b) :";
+    b = lire();
+
+    // Boucle principale de l'algorithme d'Euclide
+    tantque (b != 0) {
+        reste = a % b;
+        a = b;
+        b = reste;
+    }
+
+    afficher "Le PGCD est :";
+    afficher a;
+}
+
+
+
+
+// Implémentation de l'algorithme de Quasi-Newton avec la mise à jour SR1
+// pour trouver le minimum de la fonction f(x, y) = (x - 2)^2 + (y + 1)^2
+// Le minimum attendu est au point (2, -1).
+
+programme {
+    // --- Variables pour l'algorithme ---
+    reel x[2];         // Le point courant (x, y). x[0] est x, x[1] est y.
+    reel p[2];         // La direction de recherche.
+    reel g[2];         // Le gradient au point courant.
+    reel s[2];
+    reel y[2];
+    reel B_fois_y[2];
+    reel terme_sr1[2];
+
+    reel B[2][2];      // L'approximation de l'inverse de la Hessienne.
+
+    entier k;          // Compteur d'itérations.
+    entier max_iter;   // Nombre maximum d'itérations.
+    
+    reel alpha;        // Le pas (simplifié à une valeur fixe).
+    reel tolerance;    // Seuil pour arrêter l'algorithme.
+    reel norm_g;       // Norme du gradient.
+    reel denominateur_sr1;
+
+    // --- Initialisation ---
+    afficher "--- Initialisation de l'algorithme SR1 ---";
+    x[0] = 0;          // Point de départ x = 0
+    x[1] = 0;          // Point de départ y = 0
+
+    // Matrice identité pour B
+    B[0][0] = 1; B[0][1] = 0;
+    B[1][0] = 0; B[1][1] = 1;
+
+    max_iter = 20;
+    alpha = 1;
+    tolerance = 0.0001;
+    k = 0;
+
+    afficher "Point de départ : (0, 0)";
+
+    // --- Boucle principale de l'optimisation ---
+    tantque (k < max_iter) {
+        afficher "--- Itération numéro :";
+        afficher k;
+        
+        // 1. Calculer le gradient g_k au point x_k
+        // g = [2*(x-2), 2*(y+1)]
+        g[0] = 2 * (x[0] - 2);
+        g[1] = 2 * (x[1] + 1);
+
+        // 2. Vérifier la condition d'arrêt (norme du gradient)
+        // norm_g = sqrt(g[0]^2 + g[1]^2). On compare les carrés pour éviter sqrt.
+        norm_g = g[0]*g[0] + g[1]*g[1];
+        si (norm_g < tolerance * tolerance) {
+            afficher "Convergence atteinte ! Gradient suffisamment petit.";
+            k = max_iter; // Force la sortie de la boucle
+        } sinon {
+            // 3. Calculer la direction de recherche p_k = -B_k * g_k
+            p[0] = -(B[0][0] * g[0] + B[0][1] * g[1]);
+            p[1] = -(B[1][0] * g[0] + B[1][1] * g[1]);
+            
+            // 4. Mettre à jour le point : x_{k+1} = x_k + alpha * p_k
+            // On stocke l'ancien x dans s pour le moment, pour calculer s_k plus tard
+            s[0] = x[0];
+            s[1] = x[1];
+            x[0] = x[0] + alpha * p[0];
+            x[1] = x[1] + alpha * p[1];
+            
+            afficher "Nouveau point x :";
+            afficher x[0];
+            afficher "Nouveau point y :";
+            afficher x[1];
+
+            // 5. Calculer s_k = x_{k+1} - x_k
+            s[0] = x[0] - s[0];
+            s[1] = x[1] - s[1];
+
+            // 6. Calculer y_k = g_{k+1} - g_k
+            // g contient déjà g_k. On calcule g_{k+1} et on le soustrait.
+            // y[0] va stocker le nouveau g[0] temporairement
+            y[0] = 2 * (x[0] - 2); 
+            y[1] = 2 * (x[1] + 1);
+            // Maintenant y_k = g_{k+1} - g_k
+            y[0] = y[0] - g[0];
+            y[1] = y[1] - g[1];
+
+            // 7. Mettre à jour la matrice B avec la formule SR1
+            // B_{k+1} = B_k + (s_k - B_k*y_k) * (s_k - B_k*y_k)^T / ((s_k - B_k*y_k)^T * y_k)
+            
+            // Calculons d'abord terme_sr1 = s_k - B_k*y_k
+            B_fois_y[0] = B[0][0]*y[0] + B[0][1]*y[1];
+            B_fois_y[1] = B[1][0]*y[0] + B[1][1]*y[1];
+            terme_sr1[0] = s[0] - B_fois_y[0];
+            terme_sr1[1] = s[1] - B_fois_y[1];
+            
+            // Calculons le dénominateur : (terme_sr1)^T * y_k (produit scalaire)
+            denominateur_sr1 = terme_sr1[0]*y[0] + terme_sr1[1]*y[1];
+
+            // Condition de sécurité pour éviter la division par zéro
+            si (denominateur_sr1 > 0.00001 ou denominateur_sr1 < -0.00001) {
+                // Calculons le numérateur : terme_sr1 * terme_sr1^T (produit externe -> matrice)
+                // et ajoutons le à B
+                B[0][0] = B[0][0] + (terme_sr1[0] * terme_sr1[0]) / denominateur_sr1;
+                B[0][1] = B[0][1] + (terme_sr1[0] * terme_sr1[1]) / denominateur_sr1;
+                B[1][0] = B[1][0] + (terme_sr1[1] * terme_sr1[0]) / denominateur_sr1;
+                B[1][1] = B[1][1] + (terme_sr1[1] * terme_sr1[1]) / denominateur_sr1;
+            } sinon {
+                afficher "Dénominateur proche de zéro, mise à jour SR1 sautée.";
+            }
+            
+            k = k + 1;
+        }
+    }
+
+    afficher "--- Fin de l'algorithme ---";
+    afficher "Nombre d'itérations effectuées :";
+    afficher k;
+    afficher "Point minimum trouvé (x, y) :";
+    afficher x[0];
+    afficher x[1];
+    
+}
+
+
+
+
+
+
+// Implémentation du Tri Bitonique (Bitonic Sort) en francode
+// L'algorithme est conçu pour des tableaux de taille 2^k.
+// Cet exemple trie un tableau de 8 entiers.
+
+programme {
+    entier tableau[8];
+    entier n;
+    entier i;
+    entier j;
+    entier temp; // Variable temporaire pour l'échange
+
+    // Variables spécifiques à l'algorithme
+    entier taille_bloc;
+    entier taille_sous_bloc;
+    entier est_croissant;
+
+    // --- Initialisation du tableau avec des valeurs désordonnées ---
+    n = 8;
+    tableau[0] = 30;
+    tableau[1] = 70;
+    tableau[2] = 40;
+    tableau[3] = 80;
+    tableau[4] = 50;
+    tableau[5] = 10;
+    tableau[6] = 20;
+    tableau[7] = 60;
+
+    afficher "--- Tableau avant le tri ---";
+    pour (i = 0; i < n; i = i + 1) {
+        afficher tableau[i];
+    }
+
+    // --- Algorithme de Tri Bitonique ---
+
+    // Boucle externe : construit des séquences bitoniques de taille 2, 4, 8...
+    // taille_bloc représente la taille de la séquence bitonique que l'on est en train de trier.
+    taille_bloc = 2;
+    tantque (taille_bloc <= n) {
+        
+        // Boucle intermédiaire : fusionne les sous-blocs bitoniques.
+        // taille_sous_bloc représente la distance entre les éléments à comparer.
+        taille_sous_bloc = taille_bloc / 2;
+        tantque (taille_sous_bloc > 0) {
+            
+            // Boucle interne : parcourt le tableau pour faire les comparaisons/échanges.
+            pour (i = 0; i < n; i = i + 1) {
+                j = i + taille_sous_bloc;
+
+                // On vérifie qu'on ne sort pas des limites du tableau avec j
+                si (j < n) {
+                    
+                    // Déterminer la direction du tri pour le bloc actuel.
+                    // L'expression (i / taille_bloc) % 2 == 0 permet d'alterner
+                    // la direction du tri (croissant, décroissant, croissant, ...).
+                    est_croissant = ((i / taille_bloc) % 2 == 0);
+
+                    si (est_croissant) {
+                        // On veut un ordre croissant : tableau[i] < tableau[j]
+                        si (tableau[i] > tableau[j]) {
+                            // Échange
+                            temp = tableau[i];
+                            tableau[i] = tableau[j];
+                            tableau[j] = temp;
+                        }
+                    } sinon {
+                        // On veut un ordre décroissant : tableau[i] > tableau[j]
+                        si (tableau[i] < tableau[j]) {
+                            // Échange
+                            temp = tableau[i];
+                            tableau[i] = tableau[j];
+                            tableau[j] = temp;
+                        }
+                    }
+                }
+            }
+            taille_sous_bloc = taille_sous_bloc / 2;
+        }
+        taille_bloc = taille_bloc * 2;
+    }
+
+
+    afficher "--- Tableau après le tri bitonique ---";
+    pour (i = 0; i < n; i = i + 1) {
+        afficher tableau[i];
+    }
+}
+
+
+
+
+
+// Implémentation de la factorisation (décomposition) LU d'une matrice 3x3
+// avec un affichage amélioré et une étape de vérification par reconstruction.
+
+programme {
+    entier n;
+    
+    // Les matrices
+    reel A[3][3];    // Matrice originale
+    reel L[3][3];    // Matrice triangulaire inférieure
+    reel U[3][3];    // Matrice triangulaire supérieure
+    reel M[3][3];    // Matrice reconstruite (M = L * U)
+
+    // Indices de boucle
+    entier i;
+    entier j;
+    entier k;
+    
+    // Variable pour les sommes intermédiaires
+    reel somme;
+
+    // --- Initialisation de la matrice A ---
+    n = 3;
+    
+    A[0][0] = 2; A[0][1] = -1; A[0][2] = -2;
+    A[1][0] = -4; A[1][1] = 6;  A[1][2] = 3;
+    A[2][0] = -6; A[2][1] = -1; A[2][2] = 11;
+    
+    afficher "========================================";
+    afficher "--- Matrice Originale A ---";
+    pour (i = 0; i < n; i = i + 1) {
+        afficher "Ligne";
+        afficher i;
+        afficher A[i][0];
+        afficher A[i][1];
+        afficher A[i][2];
+    }
+    afficher "========================================";
+
+    // --- Algorithme de Doolittle pour la décomposition LU ---
+    pour (i = 0; i < n; i = i + 1) {
+        pour (j = 0; j < n; j = j + 1) {
+            L[i][j] = 0;
+            U[i][j] = 0;
+        }
+    }
+    
+    pour (k = 0; k < n; k = k + 1) {
+        L[k][k] = 1;
+        pour (j = k; j < n; j = j + 1) {
+            somme = 0;
+            pour (i = 0; i < k; i = i + 1) {
+                somme = somme + L[k][i] * U[i][j];
+            }
+            U[k][j] = A[k][j] - somme;
+        }
+        pour (i = k + 1; i < n; i = i + 1) {
+            somme = 0;
+            pour (j = 0; j < k; j = j + 1) {
+                somme = somme + L[i][j] * U[j][k];
+            }
+            si (U[k][k] != 0) {
+                 L[i][k] = (A[i][k] - somme) / U[k][k];
+            } sinon {
+                 afficher "ERREUR: Division par zéro ! La décomposition a échoué.";
+            }
+        }
+    }
+
+    // --- Affichage des matrices résultantes L et U ---
+    
+    afficher "--- Matrice L (Triangulaire Inférieure) ---";
+    pour (i = 0; i < n; i = i + 1) {
+        afficher "Ligne";
+        afficher i;
+        afficher L[i][0];
+        afficher L[i][1];
+        afficher L[i][2];
+    }
+    afficher "----------------------------------------";
+    
+    afficher "--- Matrice U (Triangulaire Supérieure) ---";
+    pour (i = 0; i < n; i = i + 1) {
+        afficher "Ligne";
+        afficher i;
+        afficher U[i][0];
+        afficher U[i][1];
+        afficher U[i][2];
+    }
+    afficher "========================================";
+
+    // --- Vérification : Calcul de M = L * U ---
+    afficher "--- Vérification : Reconstruction de la matrice M = L * U ---";
+    
+    pour (i = 0; i < n; i = i + 1) {
+        pour (j = 0; j < n; j = j + 1) {
+            somme = 0;
+            // Boucle pour le produit matriciel
+            pour (k = 0; k < n; k = k + 1) {
+                somme = somme + L[i][k] * U[k][j];
+            }
+            M[i][j] = somme;
+        }
+    }
+    
+    // Affichage de la matrice reconstruite M
+    pour (i = 0; i < n; i = i + 1) {
+        afficher "Ligne";
+        afficher i;
+        afficher M[i][0];
+        afficher M[i][1];
+        afficher M[i][2];
+    }
+    afficher "--- Si M est identique à A, la décomposition est correcte. ---";
+    afficher "========================================";
+}
+
+
+
+
+
+
+
+
+
+// Programme de test pour les tableaux et les matrices en francode
+
+programme {
+    entier i;
+    entier j;
+
+    // Déclaration d'une matrice de 3 lignes et 4 colonnes
+    entier ma_matrice[3][4];
+    entier somme_diagonale;
+
+    // --- 1. Démonstration d'un tableau (vecteur) ---
+    afficher "--- Démonstration des Tableaux (Vecteurs) ---";
+    
+    // Déclaration d'un tableau de 5 entiers
+    entier mon_tableau[5];
+
+    // Initialisation du tableau avec une boucle 'pour'
+    afficher "Initialisation du tableau...";
+    pour (i = 0; i < 5; i = i + 1) {
+        mon_tableau[i] = (i + 1) * 10;
+    }
+
+    // Affichage des éléments du tableau
+    afficher "Contenu du tableau :";
+    pour (i = 0; i < 5; i = i + 1) {
+        afficher mon_tableau[i];
+    }
+
+
+    // --- 2. Démonstration d'une matrice (tableau 2D) ---
+    afficher "--- Démonstration des Matrices (Tableaux 2D) ---";
+
+    
+
+    // Initialisation de la matrice avec des boucles imbriquées
+    afficher "Initialisation de la matrice...";
+    pour (i = 0; i < 3; i = i + 1) {
+        pour (j = 0; j < 4; j = j + 1) {
+            // On met une valeur simple pour l'exemple : 10*ligne + colonne
+            ma_matrice[i][j] = i*10 + j;
+        }
+    }
+
+    // Affichage de la matrice et calcul de la somme de la diagonale principale (si elle était carrée)
+    // Ici, on va juste sommer les éléments où i == j
+    afficher "Affichage de la matrice (ligne par ligne) :";
+    somme_diagonale = 0;
+    pour (i = 0; i < 3; i = i + 1) {
+        pour (j = 0; j < 4; j = j + 1) {
+            afficher ma_matrice[i][j];
+            si (i == j) {
+                somme_diagonale = somme_diagonale + ma_matrice[i][j];
+            }
+        }
+        afficher "--- fin de ligne ---";
+    }
+
+    afficher "La somme des éléments de la 'diagonale' (où i=j) est :";
+    afficher somme_diagonale;
+}
+
+
+
+
+programme {
+    entier nombre;
+    chaine resultat;
+    
+    afficher "Entrez un nombre entier :";
+    nombre = lire();
+
+    resultat = (nombre > 0) ? "Positif" : ((nombre < 0) ? "Négatif" : "Nul");
+
+    afficher "Le nombre est :";
+    afficher resultat;
+}
+
+
+
+// Programme de test complet pour le compilateur Francode
+
+programme {
+    // --- Déclarations de tous les types ---
+
+
+    entier n;
+
+    
+    //reel pi = 3.14;
+    //entier a;
+    //a  = pi;
+
+
+    
+    chaine message = "Bienvenue dans le programme de test complet !";
+
+    //afiche a+message;
+
+    entier factorielle;
+    entier somme_impairs;
+    entier i;
+    entier compteur;
+    //reel a;
+
+    // --- Affichage et Lecture ---
+    afficher message;
+    afficher "Veuillez entrer un nombre entier positif pour les calculs :";
+    n = lire();
+
+    // --- Structure SI / SINON ---
+    si (n < 0) {
+        afficher "Le nombre doit être positif ou nul.";
+    } sinon {
+        // --- Boucle POUR : Calcul de la factorielle ---
+        afficher "Calcul de la factorielle de n...";
+        factorielle = 1;
+        pour (i = 1; i <= n; i = i + 1) {
+            factorielle = factorielle * i;
+        }
+        afficher "Factorielle :";
+        afficher factorielle;
+
+        // --- Boucle TANTQUE : Somme des n premiers nombres impairs ---
+        afficher "Calcul de la somme des n premiers nombres impairs...";
+        somme_impairs = 0;
+        i = 1;
+        compteur = 0;
+        tantque (compteur < n) {
+            somme_impairs = somme_impairs + i;
+            i = i + 2;
+            compteur = compteur + 1;
+        }
+        afficher "Somme des impairs :";
+        afficher somme_impairs;
+
+        // --- Structure SELON (switch/case) ---
+        selon (n) {
+            cas 1: {
+                afficher "Le cas spécial pour 1 a été atteint.";
+            }
+            cas 5: {
+                afficher "Le cas spécial pour 5 a été atteint !";
+            }
+            defaut: {
+                afficher "Aucun cas spécial pour n.";
+            }
+        }
+    }
+
+    // --- Boucle RÉPÉTER / JUSQU'A : Compte à rebours ---
+    afficher "Lancement du compte à rebours...";
+    compteur = 5;
+    répéter {
+        afficher compteur;
+        compteur = compteur - 1;
+    } jusqu'a (compteur < 0);
+
+    afficher "Fin du programme.";
+}
+
+
+
+
+
+
+
+programme {
+    entier n;
+    entier result;
+    entier i;
+    
+    n = lire();
+    
+    si (n < 0) {
+        afficher -1;
+    } sinon {
+        result = 1;
+        i = 1;
+        
+        tantque (i <= n) {
+            result = result * i;
+            i = i + 1;
+        }
+        
+        afficher result;
+    }
+}
+
+
+
+programme {
+    entier n;
+    entier result;
+    entier i;
+    
+    n = lire();
+    
+    si (n < 0) {
+        afficher -1;
+    } sinon {
+        result = 1;
+        
+        pour (i = 1; i <= n; i = i + 1) {
+            result = result * i;
+        }
+        
+        afficher result;
+    }
+}
+
+
+
+programme {
+    entier n;
+    entier result;
+    entier i;
+    
+    n = lire();
+    
+    si (n < 0) {
+        afficher -1;
+    } sinon {
+        result = 1;
+        i = 1;
+
+        si (n == 0) {
+            afficher 1;
+        } sinon {
+            répéter {
+                result = result * i;
+                i = i + 1;
+            } jusqu'a (i > n);
+
+            afficher result;
+        }
+    }
+}
+
+
+
+//sddbsds
+programme {
+    entier age;
+    reel pi = 3.14159;
+    reel resultat;
+    chaine message = "Bonjour le monde !";
+
+    age = 30;
+
+    afficher age;
+    afficher pi;
+    afficher message;
+
+    
+    resultat = age + pi;
+    
+    afficher "Le résultat de l'addition est:";
+    afficher resultat;
+}
+
+programme {
+    entier choix;
+
+    afficher "Entrez un nombre (1, 2 ou 5):";
+    choix = lire();
+
+    selon (choix) {
+        cas 1: {
+            afficher "Vous avez choisi UN.";
+        }
+
+        cas 2: {
+            afficher "Vous avez choisi DEUX.";
+        }
+
+        cas 5: {
+            afficher "Vous avez choisi CINQ, mon préféré.";
+        }
+        
+        defaut: {
+            afficher "Choix non reconnu.";
+        }
+    }
+
+    afficher "Fin du programme.";
+}
+
+
+
+
+
+
+
+// Implémentation de l'algorithme de Quasi-Newton avec la mise à jour SR1
+// pour trouver le minimum de la fonction f(x, y) = (x - 2)^2 + (y + 1)^2
+// Le minimum attendu est au point (2, -1).
+
+programme {
+    // --- Variables pour l'algorithme ---
+    reel x[2];         // Le point courant (x, y). x[0] est x, x[1] est y.
+    reel p[2];         // La direction de recherche.
+    reel g[2];         // Le gradient au point courant.
+    reel s[2];
+    reel y[2];
+    reel B_fois_y[2];
+    reel terme_sr1[2];
+
+    reel B[2][2];      // L'approximation de l'inverse de la Hessienne.
+
+    entier k;          // Compteur d'itérations.
+    entier max_iter;   // Nombre maximum d'itérations.
+    
+    reel alpha;        // Le pas (simplifié à une valeur fixe).
+    reel tolerance;    // Seuil pour arrêter l'algorithme.
+    reel norm_g;       // Norme du gradient.
+    reel denominateur_sr1;
+
+    // --- Initialisation ---
+    afficher "--- Initialisation de l'algorithme SR1 ---";
+    x[0] = 0;          // Point de départ x = 0
+    x[1] = 0;          // Point de départ y = 0
+
+    // Matrice identité pour B
+    B[0][0] = 1; B[0][1] = 0;
+    B[1][0] = 0; B[1][1] = 1;
+
+    max_iter = 20;
+    alpha = 1;
+    tolerance = 0.0001;
+    k = 0;
+
+    afficher "Point de départ : (0, 0)";
+
+    // --- Boucle principale de l'optimisation ---
+    tantque (k < max_iter) {
+        afficher "--- Itération numéro :";
+        afficher k;
+        
+        // 1. Calculer le gradient g_k au point x_k
+        // g = [2*(x-2), 2*(y+1)]
+        g[0] = 2 * (x[0] - 2);
+        g[1] = 2 * (x[1] + 1);
+
+        // 2. Vérifier la condition d'arrêt (norme du gradient)
+        // norm_g = sqrt(g[0]^2 + g[1]^2). On compare les carrés pour éviter sqrt.
+        norm_g = g[0]*g[0] + g[1]*g[1];
+        si (norm_g < tolerance * tolerance) {
+            afficher "Convergence atteinte ! Gradient suffisamment petit.";
+            k = max_iter; // Force la sortie de la boucle
+        } sinon {
+            // 3. Calculer la direction de recherche p_k = -B_k * g_k
+            p[0] = -(B[0][0] * g[0] + B[0][1] * g[1]);
+            p[1] = -(B[1][0] * g[0] + B[1][1] * g[1]);
+            
+            // 4. Mettre à jour le point : x_{k+1} = x_k + alpha * p_k
+            // On stocke l'ancien x dans s pour le moment, pour calculer s_k plus tard
+            s[0] = x[0];
+            s[1] = x[1];
+            x[0] = x[0] + alpha * p[0];
+            x[1] = x[1] + alpha * p[1];
+            
+            afficher "Nouveau point x :";
+            afficher x[0];
+            afficher "Nouveau point y :";
+            afficher x[1];
+
+            // 5. Calculer s_k = x_{k+1} - x_k
+            s[0] = x[0] - s[0];
+            s[1] = x[1] - s[1];
+
+            // 6. Calculer y_k = g_{k+1} - g_k
+            // g contient déjà g_k. On calcule g_{k+1} et on le soustrait.
+            // y[0] va stocker le nouveau g[0] temporairement
+            y[0] = 2 * (x[0] - 2); 
+            y[1] = 2 * (x[1] + 1);
+            // Maintenant y_k = g_{k+1} - g_k
+            y[0] = y[0] - g[0];
+            y[1] = y[1] - g[1];
+
+            // 7. Mettre à jour la matrice B avec la formule SR1
+            // B_{k+1} = B_k + (s_k - B_k*y_k) * (s_k - B_k*y_k)^T / ((s_k - B_k*y_k)^T * y_k)
+            
+            // Calculons d'abord terme_sr1 = s_k - B_k*y_k
+            B_fois_y[0] = B[0][0]*y[0] + B[0][1]*y[1];
+            B_fois_y[1] = B[1][0]*y[0] + B[1][1]*y[1];
+            terme_sr1[0] = s[0] - B_fois_y[0];
+            terme_sr1[1] = s[1] - B_fois_y[1];
+            
+            // Calculons le dénominateur : (terme_sr1)^T * y_k (produit scalaire)
+            denominateur_sr1 = terme_sr1[0]*y[0] + terme_sr1[1]*y[1];
+
+            // Condition de sécurité pour éviter la division par zéro
+            si (denominateur_sr1 > 0.00001 ou denominateur_sr1 < -0.00001) {
+                // Calculons le numérateur : terme_sr1 * terme_sr1^T (produit externe -> matrice)
+                // et ajoutons le à B
+                B[0][0] = B[0][0] + (terme_sr1[0] * terme_sr1[0]) / denominateur_sr1;
+                B[0][1] = B[0][1] + (terme_sr1[0] * terme_sr1[1]) / denominateur_sr1;
+                B[1][0] = B[1][0] + (terme_sr1[1] * terme_sr1[0]) / denominateur_sr1;
+                B[1][1] = B[1][1] + (terme_sr1[1] * terme_sr1[1]) / denominateur_sr1;
+            } sinon {
+                afficher "Dénominateur proche de zéro, mise à jour SR1 sautée.";
+            }
+            
+            k = k + 1;
+        }
+    }
+
+    afficher "--- Fin de l'algorithme ---";
+    afficher "Nombre d'itérations effectuées :";
+    afficher k;
+    afficher "Point minimum trouvé (x, y) :";
+    afficher x[0];
+    afficher x[1];
+    
+}

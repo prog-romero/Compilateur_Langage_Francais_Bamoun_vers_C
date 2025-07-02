@@ -1,0 +1,573 @@
+// PGCD
+
+zə̀n nə̀ dzə́ə̀ {
+    tə̀n a;
+    tə̀n b;
+    tə̀n reste;
+
+    nzuə̀ "--- Calcul du PGCD de deux nombres ---";
+    
+    nzuə̀ "Entrez le premier nombre (a) :";
+    a = fɔ́ɔ̀();
+
+    nzuə̀ "Entrez le deuxième nombre (b) :";
+    b = fɔ́ɔ̀();
+
+    // Boucle principale de l'algorithme d'Euclide
+    ləfɛ mə̀ yɛǹ (b != 0) {
+        reste = a % b;
+        a = b;
+        b = reste;
+    }
+
+    nzuə̀ "Le PGCD est :";
+    nzuə̀ a;
+}
+
+
+
+
+
+
+// TRI BOTANNIQUE
+
+
+zə̀n nə̀ dzə́ə̀ {
+    tə̀n tableau[8];
+    tə̀n n;
+    tə̀n i;
+    tə̀n j;
+    tə̀n temp; // Variable temporaire pour l'échange
+
+    // Variables spécifiques à l'algorithme
+    tə̀n taille_bloc;
+    tə̀n taille_sous_bloc;
+    tə̀n est_croissant;
+
+    // --- Initialisation du tableau avec des valeurs désordonnées ---
+    n = 8;
+    tableau[0] = 30;
+    tableau[1] = 70;
+    tableau[2] = 40;
+    tableau[3] = 80;
+    tableau[4] = 50;
+    tableau[5] = 10;
+    tableau[6] = 20;
+    tableau[7] = 60;
+
+    nzuə̀ "--- Tableau avant le tri ---";
+    pə̀ (i = 0; i < n; i = i + 1) {
+        nzuə̀ tableau[i];
+    }
+
+    // --- Algorithme de Tri Bitonique ---
+
+    // Boucle externe : construit des séquences bitoniques de taille 2, 4, 8...
+    // taille_bloc représente la taille de la séquence bitonique que l'on est en train de trier.
+    taille_bloc = 2;
+    ləfɛ mə̀ yɛǹ (taille_bloc <= n) {
+        
+        // Boucle intermédiaire : fusionne les sous-blocs bitoniques.
+        // taille_sous_bloc représente la distance entre les éléments à comparer.
+        taille_sous_bloc = taille_bloc / 2;
+        ləfɛ mə̀ yɛǹ (taille_sous_bloc > 0) {
+            
+            // Boucle interne : parcourt le tableau pour faire les comparaisons/échanges.
+            pə̀ (i = 0; i < n; i = i + 1) {
+                j = i + taille_sous_bloc;
+
+                // On vérifie qu'on ne sort pas des limites du tableau avec j
+                yə̀n (j < n) {
+                    
+                    // Déterminer la direction du tri pour le bloc actuel.
+                    // L'expression (i / taille_bloc) % 2 == 0 permet d'alterner
+                    // la direction du tri (croissant, décroissant, croissant, ...).
+                    est_croissant = ((i / taille_bloc) % 2 == 0);
+
+                    yə̀n (est_croissant) {
+                        // On veut un ordre croissant : tableau[i] < tableau[j]
+                        yə̀n (tableau[i] > tableau[j]) {
+                            // Échange
+                            temp = tableau[i];
+                            tableau[i] = tableau[j];
+                            tableau[j] = temp;
+                        }
+                    } yə̀n mə̀ {
+                        // On veut un ordre décroissant : tableau[i] > tableau[j]
+                        yə̀n (tableau[i] < tableau[j]) {
+                            // Échange
+                            temp = tableau[i];
+                            tableau[i] = tableau[j];
+                            tableau[j] = temp;
+                        }
+                    }
+                }
+            }
+            taille_sous_bloc = taille_sous_bloc / 2;
+        }
+        taille_bloc = taille_bloc * 2;
+    }
+
+    nzuə̀ "--- Tableau après le tri bitonique ---";
+    pə̀ (i = 0; i < n; i = i + 1) {
+        nzuə̀ tableau[i];
+    }
+}
+
+
+
+
+
+// DECOMPOSITION MATRICIELLE LU
+
+zə̀n nə̀ dzə́ə̀ {
+    tə̀n n;
+    
+    // Les matrices
+    pə̀n A[3][3];    // Matrice originale
+    pə̀n L[3][3];    // Matrice triangulaire inférieure
+    pə̀n U[3][3];    // Matrice triangulaire supérieure
+    pə̀n M[3][3];    // Matrice reconstruite (M = L * U)
+
+    // Indices de boucle
+    tə̀n i;
+    tə̀n j;
+    tə̀n k;
+    
+    // Variable pour les sommes intermédiaires
+    pə̀n somme;
+
+    // --- Initialisation de la matrice A ---
+    n = 3;
+    
+    A[0][0] = 2; A[0][1] = -1; A[0][2] = -2;
+    A[1][0] = -4; A[1][1] = 6;  A[1][2] = 3;
+    A[2][0] = -6; A[2][1] = -1; A[2][2] = 11;
+    
+    nzuə̀ "========================================";
+    nzuə̀ "--- Matrice Originale A ---";
+    pə̀ (i = 0; i < n; i = i + 1) {
+        nzuə̀ "Ligne";
+        nzuə̀ i;
+        nzuə̀ A[i][0];
+        nzuə̀ A[i][1];
+        nzuə̀ A[i][2];
+    }
+    nzuə̀ "========================================";
+
+    // --- Algorithme de Doolittle pour la décomposition LU ---
+    pə̀ (i = 0; i < n; i = i + 1) {
+        pə̀ (j = 0; j < n; j = j + 1) {
+            L[i][j] = 0;
+            U[i][j] = 0;
+        }
+    }
+    
+    pə̀ (k = 0; k < n; k = k + 1) {
+        L[k][k] = 1;
+        pə̀ (j = k; j < n; j = j + 1) {
+            somme = 0;
+            pə̀ (i = 0; i < k; i = i + 1) {
+                somme = somme + L[k][i] * U[i][j];
+            }
+            U[k][j] = A[k][j] - somme;
+        }
+        pə̀ (i = k + 1; i < n; i = i + 1) {
+            somme = 0;
+            pə̀ (j = 0; j < k; j = j + 1) {
+                somme = somme + L[i][j] * U[j][k];
+            }
+            yə̀n (U[k][k] != 0) {
+                 L[i][k] = (A[i][k] - somme) / U[k][k];
+            } yə̀n mə̀ {
+                 nzuə̀ "ERREUR: Division par zéro ! La décomposition a échoué.";
+            }
+        }
+    }
+
+    // --- Affichage des matrices résultantes L et U ---
+    
+    nzuə̀ "--- Matrice L (Triangulaire Inférieure) ---";
+    pə̀ (i = 0; i < n; i = i + 1) {
+        nzuə̀ "Ligne";
+        nzuə̀ i;
+        nzuə̀ L[i][0];
+        nzuə̀ L[i][1];
+        nzuə̀ L[i][2];
+    }
+    nzuə̀ "----------------------------------------";
+    
+    nzuə̀ "--- Matrice U (Triangulaire Supérieure) ---";
+    pə̀ (i = 0; i < n; i = i + 1) {
+        nzuə̀ "Ligne";
+        nzuə̀ i;
+        nzuə̀ U[i][0];
+        nzuə̀ U[i][1];
+        nzuə̀ U[i][2];
+    }
+    nzuə̀ "========================================";
+
+    // --- Vérification : Calcul de M = L * U ---
+    nzuə̀ "--- Vérification : Reconstruction de la matrice M = L * U ---";
+    
+    pə̀ (i = 0; i < n; i = i + 1) {
+        pə̀ (j = 0; j < n; j = j + 1) {
+            somme = 0;
+            // Boucle pour le produit matriciel
+            pə̀ (k = 0; k < n; k = k + 1) {
+                somme = somme + L[i][k] * U[k][j];
+            }
+            M[i][j] = somme;
+        }
+    }
+    
+    // Affichage de la matrice reconstruite M
+    pə̀ (i = 0; i < n; i = i + 1) {
+        nzuə̀ "Ligne";
+        nzuə̀ i;
+        nzuə̀ M[i][0];
+        nzuə̀ M[i][1];
+        nzuə̀ M[i][2];
+    }
+    nzuə̀ "--- Si M est identique à A, la décomposition est correcte. ---";
+    nzuə̀ "========================================";
+}
+
+
+
+
+
+// OPERATEUR TERNAIRE
+
+zə̀n nə̀ dzə́ə̀ {
+    tə̀n nombre;
+    kə̀mə̀n resultat;
+    
+    nzuə̀ "Entrez un nombre entier :";
+    nombre = fɔ́ɔ̀();
+
+    resultat = (nombre > 0) ? "Positif" : ((nombre < 0) ? "Négatif" : "Nul");
+
+    nzuə̀ "Le nombre est :";
+    nzuə̀ resultat;
+}
+
+
+
+
+
+// FACTORIELLE 
+
+zə̀n nə̀ dzə́ə̀ {
+    tə̀n n;
+    tə̀n result;
+    tə̀n i;
+    
+    n = fɔ́ɔ̀();
+    
+    yə̀n (n < 0) {
+        nzuə̀ -1;
+    } yə̀n mə̀ {
+        result = 1;
+        i = 1;
+        
+        ləfɛ mə̀ yɛǹ (i <= n) {
+            result = result * i;
+            i = i + 1;
+        }
+        
+        nzuə̀ result;
+    }
+}
+
+
+
+
+
+
+// QUASI-NEWTON
+
+zə̀n nə̀ dzə́ə̀ {
+    // --- Variables pour l'algorithme ---
+    pə̀n x[2];         // Le point courant (x, y). x[0] est x, x[1] est y.
+    pə̀n p[2];         // La direction de recherche.
+    pə̀n g[2];         // Le gradient au point courant.
+    pə̀n s[2];
+    pə̀n y[2];
+    pə̀n B_fois_y[2];
+    pə̀n terme_sr1[2];
+
+    pə̀n B[2][2];      // L'approximation de l'inverse de la Hessienne.
+
+    tə̀n k;          // Compteur d'itérations.
+    tə̀n max_iter;   // Nombre maximum d'itérations.
+    
+    pə̀n alpha;        // Le pas (simplifié à une valeur fixe).
+    pə̀n tolerance;    // Seuil pour arrêter l'algorithme.
+    pə̀n norm_g;       // Norme du gradient.
+    pə̀n denominateur_sr1;
+
+    // --- Initialisation ---
+    nzuə̀ "--- Initialisation de l'algorithme SR1 ---";
+    x[0] = 0;          // Point de départ x = 0
+    x[1] = 0;          // Point de départ y = 0
+
+    // Matrice identité pour B
+    B[0][0] = 1; B[0][1] = 0;
+    B[1][0] = 0; B[1][1] = 1;
+
+    max_iter = 20;
+    alpha = 1;
+    tolerance = 0.0001;
+    k = 0;
+
+    nzuə̀ "Point de départ : (0, 0)";
+
+    // --- Boucle principale de l'optimisation ---
+    ləfɛ mə̀ yɛǹ (k < max_iter) {
+        nzuə̀ "--- Itération numéro :";
+        nzuə̀ k;
+        
+        // 1. Calculer le gradient g_k au point x_k
+        // g = [2*(x-2), 2*(y+1)]
+        g[0] = 2 * (x[0] - 2);
+        g[1] = 2 * (x[1] + 1);
+
+        // 2. Vérifier la condition d'arrêt (norme du gradient)
+        // norm_g = sqrt(g[0]^2 + g[1]^2). On compare les carrés pour éviter sqrt.
+        norm_g = g[0]*g[0] + g[1]*g[1];
+        yə̀n (norm_g < tolerance * tolerance) {
+            nzuə̀ "Convergence atteinte ! Gradient suffisamment petit.";
+            k = max_iter; // Force la sortie de la boucle
+        } yə̀n mə̀ {
+            // 3. Calculer la direction de recherche p_k = -B_k * g_k
+            p[0] = -(B[0][0] * g[0] + B[0][1] * g[1]);
+            p[1] = -(B[1][0] * g[0] + B[1][1] * g[1]);
+            
+            // 4. Mettre à jour le point : x_{k+1} = x_k + alpha * p_k
+            // On stocke l'ancien x dans s pour le moment, pour calculer s_k plus tard
+            s[0] = x[0];
+            s[1] = x[1];
+            x[0] = x[0] + alpha * p[0];
+            x[1] = x[1] + alpha * p[1];
+            
+            nzuə̀ "Nouveau point x :";
+            nzuə̀ x[0];
+            nzuə̀ "Nouveau point y :";
+            nzuə̀ x[1];
+
+            // 5. Calculer s_k = x_{k+1} - x_k
+            s[0] = x[0] - s[0];
+            s[1] = x[1] - s[1];
+
+            // 6. Calculer y_k = g_{k+1} - g_k
+            // g contient déjà g_k. On calcule g_{k+1} et on le soustrait.
+            // y[0] va stocker le nouveau g[0] temporairement
+            y[0] = 2 * (x[0] - 2); 
+            y[1] = 2 * (x[1] + 1);
+            // Maintenant y_k = g_{k+1} - g_k
+            y[0] = y[0] - g[0];
+            y[1] = y[1] - g[1];
+
+            // 7. Mettre à jour la matrice B avec la formule SR1
+            // B_{k+1} = B_k + (s_k - B_k*y_k) * (s_k - B_k*y_k)^T / ((s_k - B_k*y_k)^T * y_k)
+            
+            // Calculons d'abord terme_sr1 = s_k - B_k*y_k
+            B_fois_y[0] = B[0][0]*y[0] + B[0][1]*y[1];
+            B_fois_y[1] = B[1][0]*y[0] + B[1][1]*y[1];
+            terme_sr1[0] = s[0] - B_fois_y[0];
+            terme_sr1[1] = s[1] - B_fois_y[1];
+            
+            // Calculons le dénominateur : (terme_sr1)^T * y_k (produit scalaire)
+            denominateur_sr1 = terme_sr1[0]*y[0] + terme_sr1[1]*y[1];
+
+            // Condition de sécurité pour éviter la division par zéro
+            yə̀n (denominateur_sr1 > 0.00001 wə̀ denominateur_sr1 < -0.00001) {
+                // Calculons le numérateur : terme_sr1 * terme_sr1^T (produit externe -> matrice)
+                // et ajoutons le à B
+                B[0][0] = B[0][0] + (terme_sr1[0] * terme_sr1[0]) / denominateur_sr1;
+                B[0][1] = B[0][1] + (terme_sr1[0] * terme_sr1[1]) / denominateur_sr1;
+                B[1][0] = B[1][0] + (terme_sr1[1] * terme_sr1[0]) / denominateur_sr1;
+                B[1][1] = B[1][1] + (terme_sr1[1] * terme_sr1[1]) / denominateur_sr1;
+            } yə̀n mə̀ {
+                nzuə̀ "Dénominateur proche de zéro, mise à jour SR1 sautée.";
+            }
+            
+            k = k + 1;
+        }
+    }
+
+    nzuə̀ "--- Fin de l'algorithme ---";
+    nzuə̀ "Nombre d'itérations effectuées :";
+    nzuə̀ k;
+    nzuə̀ "Point minimum trouvé (x, y) :";
+    nzuə̀ x[0];
+    nzuə̀ x[1];
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// DEMONSTRATION MATRICE TABLEAU
+
+zə̀n nə̀ dzə́ə̀ {
+    tə̀n i;
+    tə̀n j;
+
+    // Déclaration d'une matrice de 3 lignes et 4 colonnes
+    tə̀n ma_matrice[3][4];
+    tə̀n somme_diagonale;
+
+    // --- 1. Démonstration d'un tableau (vecteur) ---
+    nzuə̀ "--- Démonstration des Tableaux (Vecteurs) ---";
+    
+    // Déclaration d'un tableau de 5 entiers
+    tə̀n mon_tableau[5];
+
+    // Initialisation du tableau avec une boucle 'pour'
+    nzuə̀ "Initialisation du tableau...";
+    pə̀ (i = 0; i < 5; i = i + 1) {
+        mon_tableau[i] = (i + 1) * 10;
+    }
+
+    // Affichage des éléments du tableau
+    nzuə̀ "Contenu du tableau :";
+    pə̀ (i = 0; i < 5; i = i + 1) {
+        nzuə̀ mon_tableau[i];
+    }
+
+    // --- 2. Démonstration d'une matrice (tableau 2D) ---
+    nzuə̀ "--- Démonstration des Matrices (Tableaux 2D) ---";
+
+    // Initialisation de la matrice avec des boucles imbriquées
+    nzuə̀ "Initialisation de la matrice...";
+    pə̀ (i = 0; i < 3; i = i + 1) {
+        pə̀ (j = 0; j < 4; j = j + 1) {
+            // On met une valeur simple pour l'exemple : 10*ligne + colonne
+            ma_matrice[i][j] = i*10 + j;
+        }
+    }
+
+    // Affichage de la matrice et calcul de la somme de la diagonale principale (si elle était carrée)
+    // Ici, on va juste sommer les éléments où i == j
+    nzuə̀ "Affichage de la matrice (ligne par ligne) :";
+    somme_diagonale = 0;
+    pə̀ (i = 0; i < 3; i = i + 1) {
+        pə̀ (j = 0; j < 4; j = j + 1) {
+            nzuə̀ ma_matrice[i][j];
+            yə̀n (i == j) {
+                somme_diagonale = somme_diagonale + ma_matrice[i][j];
+            }
+        }
+        nzuə̀ "--- fin de ligne ---";
+    }
+
+    nzuə̀ "La somme des éléments de la 'diagonale' (où i=j) est :";
+    nzuə̀ somme_diagonale;
+}
+
+
+
+
+
+
+// DEMONSTRATION STRUCTURE ITTER-CONDIT
+
+zə̀n nə̀ dzə́ə̀ {
+    // --- Déclarations de tous les types ---
+    tə̀n n;
+    
+    //reel pi = 3.14;
+    //entier a;
+    //a  = pi;
+    
+    kə̀mə̀n message = "Bienvenue dans le programme de test complet !";
+
+    //afiche a+message;
+
+    tə̀n factorielle;
+    tə̀n somme_impairs;
+    tə̀n i;
+    tə̀n compteur;
+    //reel a;
+
+    // --- Affichage et Lecture ---
+    nzuə̀ message;
+    nzuə̀ "Veuillez entrer un nombre entier positif pour les calculs :";
+    n = fɔ́ɔ̀();
+
+    // --- Structure SI / SINON ---
+    yə̀n (n < 0) {
+        nzuə̀ "Le nombre doit être positif ou nul.";
+    } yə̀n mə̀ {
+        // --- Boucle POUR : Calcul de la factorielle ---
+        nzuə̀ "Calcul de la factorielle de n...";
+        factorielle = 1;
+        pə̀ (i = 1; i <= n; i = i + 1) {
+            factorielle = factorielle * i;
+        }
+        nzuə̀ "Factorielle :";
+        nzuə̀ factorielle;
+
+        // --- Boucle TANTQUE : Somme des n premiers nombres impairs ---
+        nzuə̀ "Calcul de la somme des n premiers nombres impairs...";
+        somme_impairs = 0;
+        i = 1;
+        compteur = 0;
+        ləfɛ mə̀ yɛǹ (compteur < n) {
+            somme_impairs = somme_impairs + i;
+            i = i + 2;
+            compteur = compteur + 1;
+        }
+        nzuə̀ "Somme des impairs :";
+        nzuə̀ somme_impairs;
+
+        // --- Structure SELON (switch/case) ---
+        sə̀lə̀n (n) {
+            kàs 1: {
+                nzuə̀ "Le cas spécial pour 1 a été atteint.";
+            }
+            kàs 5: {
+                nzuə̀ "Le cas spécial pour 5 a été atteint !";
+            }
+            də̀fà: {
+                nzuə̀ "Aucun cas spécial pour n.";
+            }
+        }
+    }
+
+    // --- Boucle RÉPÉTER / JUSQU'A : Compte à rebours ---
+    nzuə̀ "Lancement du compte à rebours...";
+    compteur = 5;
+    tə̀pə̀ {
+        nzuə̀ compteur;
+        compteur = compteur - 1;
+    } kə̀tə̀ (compteur < 0);
+
+    nzuə̀ "Fin du programme.";
+}

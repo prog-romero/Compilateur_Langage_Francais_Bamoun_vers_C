@@ -1,0 +1,65 @@
+
+%{
+#include <stdio.h>
+#include <string.h>
+#include "generateurs/ast.h"
+#include "francode.tab.h"
+%}
+
+%option noyywrap yylineno nounput noinput
+
+%%
+
+"//".*          ;
+[ \t\r\n]+      ;
+
+"programme"     { return PROGRAMME; }
+"entier"        { return TOKEN_TYPE_ENTIER; }
+"reel"          { return TOKEN_TYPE_REEL; }
+"chaine"        { return TOKEN_TYPE_CHAINE; }
+"afficher"      { return AFFICHER; }
+"si"            { return SI; }
+"sinon"         { return SINON; }
+"tantque"       { return TANTQUE; }
+"pour"          { return POUR; }
+"répéter"       { return REPETER; }
+"jusqu'a"       { return JUSQUA; }
+"selon"         { return SELON; }
+"cas"           { return CAS; }
+"defaut"        { return DEFAUT; }
+"retourner"     { return RETOURNER; }
+"lire"          { return LIRE; }
+"et"            { return AND; }
+"ou"            { return OR; }
+"non"           { return NOT; }
+
+[0-9]+\.[0-9]+      { yylval.d_val = atof(yytext); return FLOAT_LITERAL; }
+[0-9]+              { yylval.num = atoi(yytext); return INT_LITERAL; }
+"\""[^"]*"\""       { yytext[strlen(yytext) - 1] = '\0'; yylval.str = strdup(yytext + 1); return STRING_LITERAL; }
+[a-zA-Z_][a-zA-Z0-9_]* { yylval.str = strdup(yytext); return IDENTIFIER; }
+
+"=="                { return EQ; }
+"!="                { return NE; }
+"<="                { return LE; }
+">="                { return GE; }
+"<"                 { return LT; }
+">"                 { return GT; }
+"="                 { return ASSIGN; }
+"+"                 { return PLUS; }
+"-"                 { return MINUS; }
+"*"                 { return MULT; }
+"/"                 { return DIV; }
+"%"                 { return MOD; }
+"?"                 { return QUESTION_MARK; }
+":"                 { return COLON; } /* <<<--- CORRECTION ICI */
+";"                 { return PV; }
+"{"                 { return LBRACE; }
+"}"                 { return RBRACE; }
+"("                 { return PO; }
+")"                 { return PF; }
+"["                 { return LBRACKET; }
+"]"                 { return RBRACKET; }
+
+.                   { fprintf(stderr, "[Erreur Lexicale] Ligne %d: Caractère non reconnu: '%s'\n", yylineno, yytext); }
+
+%%

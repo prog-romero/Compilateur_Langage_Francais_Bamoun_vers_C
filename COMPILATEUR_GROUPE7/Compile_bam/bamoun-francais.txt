@@ -1,0 +1,96 @@
+Correspondance Bamum-Français
+
+
+
+Bamum
+Français
+
+
+
+yə̀n
+si
+
+
+yɛǹnə̀
+alors
+
+
+yə̀n mə̀
+sinon
+
+
+mə̀ yə̀n
+finsi
+
+
+ləfɛ mə̀ yɛǹ
+tant_que
+
+
+də̀
+faire
+
+
+mə̀ ləfɛ
+fintantque
+
+
+pə̀
+pour
+
+
+kə̀
+a
+
+
+mə̀ pə̀
+finpour
+
+
+fɔ́ɔ̀
+lire
+
+
+nziə̀
+ecrire
+
+
+nzuə̀
+afficher
+
+
+tə̀n
+entier
+
+
+pə̀n
+reel
+
+
+kə̀mə̀n
+chaine
+
+
+zə̀n nə̀ dzə́ə̀
+programme
+
+
+mə̀ zə̀n
+finprogramme
+
+
+nziə̀ tə́ mə̀lə̀
+fonction
+
+
+də̀ tɔ̀
+retourner
+
+
+nkùm
+vrai
+
+
+nket
+faux
+
